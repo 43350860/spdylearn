@@ -2496,7 +2496,7 @@ public final class URLConnectionTest {
     HttpURLConnection connection = client.open(server.getUrl("/"));
     connection.setDoOutput(true);
     long contentLength = Integer.MAX_VALUE + 1L;
-    connection.setFixedLengthStreamingMode(contentLength);
+    connection.setFixedLengthStreamingMode(Integer.MAX_VALUE );
     OutputStream out = connection.getOutputStream();
     byte[] buffer = new byte[1024 * 1024];
     for (long bytesWritten = 0; bytesWritten < contentLength; ) {

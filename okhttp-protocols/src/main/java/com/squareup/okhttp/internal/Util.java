@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringWriter;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URL;
@@ -114,6 +115,17 @@ public final class Util {
       }
     }
   }
+  
+  public static void closeQuietly(ServerSocket serverSocket) {
+	    if (serverSocket != null) {
+	      try {
+	    	  serverSocket.close();
+	      } catch (RuntimeException rethrown) {
+	        throw rethrown;
+	      } catch (Exception ignored) {
+	      }
+	    }
+	  }
 
   /**
    * Closes {@code socket}, ignoring any checked exceptions. Does nothing if
