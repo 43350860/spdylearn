@@ -119,10 +119,13 @@ public class Platform {
     try {
       Constructor<DeflaterOutputStream> constructor = deflaterConstructor;
       if (constructor == null) {
-        constructor = deflaterConstructor = DeflaterOutputStream.class.getConstructor(
-            OutputStream.class, Deflater.class, boolean.class);
+        /*constructor = deflaterConstructor = DeflaterOutputStream.class.getConstructor(
+            OutputStream.class, Deflater.class, boolean.class);*/
+    	  constructor = deflaterConstructor = DeflaterOutputStream.class.getConstructor(
+    	            OutputStream.class, Deflater.class);
       }
-      return constructor.newInstance(out, deflater, syncFlush);
+      //return constructor.newInstance(out, deflater, syncFlush);
+      return constructor.newInstance(out, deflater);
     } catch (NoSuchMethodException e) {
       throw new UnsupportedOperationException("Cannot SPDY; no SYNC_FLUSH available");
     } catch (InvocationTargetException e) {

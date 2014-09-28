@@ -105,6 +105,10 @@ public final class Connection implements Closeable {
 
     if (route.address.sslSocketFactory != null) {
       upgradeToTls(tunnelRequest);
+    } else {
+    	//直接创建spdy
+         spdyConnection = new SpdyConnection.Builder(route.address.getUriHost(), true, in, out)
+             .build();
     }
 
     // Use MTU-sized buffers to send fewer packets.
@@ -143,7 +147,7 @@ public final class Connection implements Closeable {
     }
 
     // Force handshake. This can throw!
-    sslSocket.startHandshake();
+    sslSocket.startHandshake(); //TODO 临时取消握手
 
     // Verify that the socket's certificates are acceptable for the target host.
     if (!route.address.hostnameVerifier.verify(route.address.uriHost, sslSocket.getSession())) {

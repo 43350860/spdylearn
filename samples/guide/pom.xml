@@ -18,5 +18,18 @@
       <artifactId>okhttp</artifactId>
       <version>${project.version}</version>
     </dependency>
+    
+     <dependency>
+      <groupId>com.squareup.okhttp</groupId>
+	  <artifactId>okhttp-apache</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    
   </dependencies>
 </project>
