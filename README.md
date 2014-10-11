@@ -1,3 +1,5 @@
+**PS: The current project is only for personal learning use.**
+
 OkHttp
 ======
 
