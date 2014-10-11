@@ -80,6 +80,7 @@ public final class SslContextBuilder {
     TrustManagerFactory trustManagerFactory =
         TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
     trustManagerFactory.init(keyStore);
+    
     SSLContext sslContext = SSLContext.getInstance("TLS");
     sslContext.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(),
         new SecureRandom());

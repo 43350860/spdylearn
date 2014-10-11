@@ -17,6 +17,7 @@
 package com.squareup.okhttp.internal.spdy;
 
 import com.squareup.okhttp.internal.SslContextBuilder;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -27,17 +28,26 @@ import java.io.Writer;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URI;
+import java.net.URL;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
+
 import org.eclipse.jetty.npn.NextProtoNego;
 
 /** A basic SPDY server that serves the contents of a local directory. */
 public final class SpdyServer implements IncomingStreamHandler {
 	private final File baseDirectory;
 	private SSLSocketFactory sslSocketFactory;
+	private static final int PORT = 8888;
+	private static final Logger LOGGER = Logger.getLogger("SpdyServer");
 
 	public SpdyServer(File baseDirectory) {
 		this.baseDirectory = baseDirectory;
@@ -48,16 +58,16 @@ public final class SpdyServer implements IncomingStreamHandler {
 	}
 
 	private void run() throws Exception {
-		ServerSocket serverSocket = new ServerSocket(8888);
+		ServerSocket serverSocket = new ServerSocket(PORT);
 		serverSocket.setReuseAddress(true);
-
+		
 		while (true) {
-			System.out.println("服务器启动完成！");
+			LOGGER.log(Level.INFO, "服务器启动完成, 端口："+PORT);
 			Socket socket = serverSocket.accept();
 			if (sslSocketFactory != null) {
 				socket = doSsl(socket);
 			}
-			System.out.println("分发给SpdyConnection.");
+			LOGGER.log(Level.INFO, "分发给SpdyConnection.");
 			new SpdyConnection.Builder(false, socket).handler(this).build();
 		}
 	}
@@ -156,17 +166,22 @@ public final class SpdyServer implements IncomingStreamHandler {
 	}
 
 	public static void main(String... args) throws Exception {
-		if (args.length != 1 || args[0].startsWith("-")) {
+		/*if (args.length != 1 || args[0].startsWith("-")) {
 			System.out.println("Usage: SpdyServer <base directory>");
 			return;
 		}
 		
-		System.out.println(InetAddress.getLocalHost().getHostName());
+		SpdyServer server = new SpdyServer(new File(args[0]));*/
 		
-		SpdyServer server = new SpdyServer(new File(args[0]));
-		/*SSLContext sslContext = new SslContextBuilder(InetAddress
+		URL webcontentUrl = SpdyServer.class.getResource("/webcontent");
+		
+		LOGGER.info("hostname: "+InetAddress.getLocalHost().getHostName());
+		LOGGER.info("base directory: "+webcontentUrl.getFile());
+
+		SpdyServer server = new SpdyServer(new File(webcontentUrl.getFile()));
+		SSLContext sslContext = new SslContextBuilder(InetAddress
 				.getLocalHost().getHostName()).build();
-		server.useHttps(sslContext.getSocketFactory());*/
+		server.useHttps(sslContext.getSocketFactory());
 		server.run();
 	}
 }

@@ -105,11 +105,11 @@ public final class Connection implements Closeable {
 
     if (route.address.sslSocketFactory != null) {
       upgradeToTls(tunnelRequest);
-    } else {
+    } /*else {
     	//直接创建spdy
          spdyConnection = new SpdyConnection.Builder(route.address.getUriHost(), true, in, out)
              .build();
-    }
+    }*/
 
     // Use MTU-sized buffers to send fewer packets.
     int mtu = Platform.get().getMtu(socket);

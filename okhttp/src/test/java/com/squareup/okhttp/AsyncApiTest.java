@@ -25,48 +25,47 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public final class AsyncApiTest {
-  private MockWebServer server = new MockWebServer();
-  private OkHttpClient client = new OkHttpClient();
-  private RecordingReceiver receiver = new RecordingReceiver();
+    private MockWebServer server = new MockWebServer();
+    private OkHttpClient client = new OkHttpClient();
+    private RecordingReceiver receiver = new RecordingReceiver();
 
-  @After public void tearDown() throws Exception {
-    server.shutdown();
-  }
+    @After
+    public void tearDown() throws Exception {
+        server.shutdown();
+    }
 
-  @Test public void get() throws Exception {
-    server.enqueue(new MockResponse()
-        .setBody("abc")
-        .addHeader("Content-Type: text/plain"));
-    server.play();
+    @Test
+    public void get() throws Exception {
+        server.enqueue(new MockResponse().setBody("abc").addHeader(
+                           "Content-Type: text/plain"));
+        server.play();
 
-    Request request = new Request.Builder(server.getUrl("/"))
-        .header("User-Agent", "AsyncApiTest")
-        .build();
-    client.enqueue(request, receiver);
+        Request request = new Request.Builder(server.getUrl("/")).header(
+            "User-Agent", "AsyncApiTest").build();
+        client.enqueue(request, receiver);
 
-    receiver.await(request)
-        .assertCode(200)
+        receiver.await(request).assertCode(200)
         .assertContainsHeaders("Content-Type: text/plain")
         .assertBody("abc");
 
-    assertTrue(server.takeRequest().getHeaders().contains("User-Agent: AsyncApiTest"));
-  }
+        assertTrue(server.takeRequest().getHeaders()
+                   .contains("User-Agent: AsyncApiTest"));
+    }
 
-  @Test public void post() throws Exception {
-    server.enqueue(new MockResponse().setBody("abc"));
-    server.play();
+    @Test
+    public void post() throws Exception {
+        server.enqueue(new MockResponse().setBody("abc"));
+        server.play();
 
-    Request request = new Request.Builder(server.getUrl("/"))
-        .post(Request.Body.create(MediaType.parse("text/plain"), "def"))
+        Request request = new Request.Builder(server.getUrl("/")).post(
+            Request.Body.create(MediaType.parse("text/plain"), "def"))
         .build();
-    client.enqueue(request, receiver);
+        client.enqueue(request, receiver);
 
-    receiver.await(request)
-        .assertCode(200)
-        .assertBody("abc");
+        receiver.await(request).assertCode(200).assertBody("abc");
 
-    RecordedRequest recordedRequest = server.takeRequest();
-    assertEquals("def", recordedRequest.getUtf8Body());
-    assertEquals("3", recordedRequest.getHeader("Content-Length"));
-  }
+        RecordedRequest recordedRequest = server.takeRequest();
+        assertEquals("def", recordedRequest.getUtf8Body());
+        assertEquals("3", recordedRequest.getHeader("Content-Length"));
+    }
 }

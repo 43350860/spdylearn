@@ -1,11 +1,14 @@
 package com.jm.okhttp.happyplay;
 
-import java.io.OutputStream;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import com.squareup.okhttp.ConnectionPool;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLSession;
+
 import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.internal.http.HttpsURLConnectionImpl;
 
 public class LocalSpdyClient {
 	
@@ -15,16 +18,26 @@ public class LocalSpdyClient {
 	
 	public void run() throws Exception{
 		
-		HttpURLConnection connection = okHttpClient.open(new URL("http://alipay-jm:8888"));
+		HttpURLConnection connection = okHttpClient.open(new URL("https://alipay-jm:8888/contributors.html"));
 		connection.setDoOutput(true);
 		connection.setRequestMethod("POST");
-		connection.connect();
+		HttpsURLConnectionImpl connectionImpl = (HttpsURLConnectionImpl) connection;
+		connectionImpl.setHostnameVerifier(new HostnameVerifier() {
+			
+			@Override
+			public boolean verify(String arg0, SSLSession arg1) {
+				return true;
+			}
+			
+		});
 		
-		ConnectionPool connPool = ConnectionPool.getDefault();
 		
-		OutputStream outputStream = connection.getOutputStream();
-		outputStream.write("中华人民共和国".getBytes("UTF-8"));
-		outputStream.flush();
+		InputStream inputStream = connection.getInputStream();
+		byte buff[] = new byte[1024];
+		for (int i = -1; (i = inputStream.read(buff)) != -1;) {
+			System.out.println(new String(buff,0,i));
+		}
+		inputStream.close();
 	}
 	
 	public static void main(String[] args) throws Exception {

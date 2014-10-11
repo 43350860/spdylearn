@@ -15,7 +15,7 @@ public class OkApacheClientGetExample {
 	// static String mUrl =
 	// "https://raw.github.com/square/okhttp/master/README.md";
 
-	static String mUrl = "http://alipay-jm:8888/index.htm";
+	static String mUrl = "http://alipay-jm:8888/contributors.html";
 
 	public static void main(String[] args) throws IOException,
 			InterruptedException {
