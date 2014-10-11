@@ -29,6 +29,7 @@ import com.squareup.okhttp.Route;
 import com.squareup.okhttp.internal.Internal;
 import com.squareup.okhttp.internal.InternalCache;
 import com.squareup.okhttp.internal.Util;
+import com.squareup.okhttp.internal.Version;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.CookieHandler;
@@ -52,6 +53,7 @@ import static com.squareup.okhttp.internal.Util.closeQuietly;
 import static com.squareup.okhttp.internal.Util.getDefaultPort;
 import static com.squareup.okhttp.internal.Util.getEffectivePort;
 import static com.squareup.okhttp.internal.http.StatusLine.HTTP_CONTINUE;
+import static com.squareup.okhttp.internal.http.StatusLine.HTTP_PERM_REDIRECT;
 import static com.squareup.okhttp.internal.http.StatusLine.HTTP_TEMP_REDIRECT;
 import static java.net.HttpURLConnection.HTTP_MOVED_PERM;
 import static java.net.HttpURLConnection.HTTP_MOVED_TEMP;
@@ -582,6 +584,10 @@ public final class HttpEngine {
       OkHeaders.addCookies(result, cookies);
     }
 
+    if (request.header("User-Agent") == null) {
+      result.header("User-Agent", Version.userAgent());
+    }
+
     return result.build();
   }
 
@@ -772,11 +778,12 @@ public final class HttpEngine {
       case HTTP_UNAUTHORIZED:
         return OkHeaders.processAuthHeader(client.getAuthenticator(), userResponse, selectedProxy);
 
+      case HTTP_PERM_REDIRECT:
       case HTTP_TEMP_REDIRECT:
-        // "If the 307 status code is received in response to a request other than GET or HEAD,
-        // the user agent MUST NOT automatically redirect the request"
+        // "If the 307 or 308 status code is received in response to a request other than GET
+        // or HEAD, the user agent MUST NOT automatically redirect the request"
         if (!userRequest.method().equals("GET") && !userRequest.method().equals("HEAD")) {
-          return null;
+            return null;
         }
         // fall-through
       case HTTP_MULT_CHOICE:

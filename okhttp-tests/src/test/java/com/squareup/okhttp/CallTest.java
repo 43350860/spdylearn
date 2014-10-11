@@ -1172,6 +1172,33 @@ public final class CallTest {
     assertEquals(1, server.getRequestCount());
   }
 
+  @Test public void cancelInFlightBeforeResponseReadThrowsIOE() throws Exception {
+    server.setDispatcher(new Dispatcher() {
+      @Override public MockResponse dispatch(RecordedRequest request) {
+        client.cancel("request");
+        return new MockResponse().setBody("A");
+      }
+    });
+    server.play();
+
+    Request request = new Request.Builder().url(server.getUrl("/a")).tag("request").build();
+    try {
+      client.newCall(request).execute();
+      fail();
+    } catch (IOException e) {
+    }
+  }
+
+  @Test public void cancelInFlightBeforeResponseReadThrowsIOE_HTTP_2() throws Exception {
+    enableProtocol(Protocol.HTTP_2);
+    cancelInFlightBeforeResponseReadThrowsIOE();
+  }
+
+  @Test public void cancelInFlightBeforeResponseReadThrowsIOE_SPDY_3() throws Exception {
+    enableProtocol(Protocol.SPDY_3);
+    cancelInFlightBeforeResponseReadThrowsIOE();
+  }
+
   /**
    * This test puts a request in front of one that is to be canceled, so that it is canceled before
    * I/O takes place.
@@ -1355,14 +1382,15 @@ public final class CallTest {
     response.body().close();
   }
 
-  @Test public void userAgentIsOmittedByDefault() throws Exception {
+  @Test public void userAgentIsIncludedByDefault() throws Exception {
     server.enqueue(new MockResponse());
     server.play();
 
     executeSynchronously(new Request.Builder().url(server.getUrl("/")).build());
 
     RecordedRequest recordedRequest = server.takeRequest();
-    assertNull(recordedRequest.getHeader("User-Agent"));
+    assertTrue(recordedRequest.getHeader("User-Agent")
+        .matches("okhttp/\\d\\.\\d\\.\\d(-SNAPSHOT)?"));
   }
 
   @Test

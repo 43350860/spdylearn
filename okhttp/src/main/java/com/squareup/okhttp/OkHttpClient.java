@@ -17,6 +17,7 @@ package com.squareup.okhttp;
 
 import com.squareup.okhttp.internal.Internal;
 import com.squareup.okhttp.internal.InternalCache;
+import com.squareup.okhttp.internal.Network;
 import com.squareup.okhttp.internal.RouteDatabase;
 import com.squareup.okhttp.internal.Util;
 import com.squareup.okhttp.internal.http.AuthenticatorAdapter;
@@ -99,6 +100,14 @@ public class OkHttpClient implements Cloneable {
         return client.routeDatabase();
       }
 
+      @Override public Network network(OkHttpClient client) {
+        return client.network;
+      }
+
+      @Override public void setNetwork(OkHttpClient client, Network network) {
+        client.network = network;
+      }
+
       @Override public void connectAndSetOwner(OkHttpClient client, Connection connection,
           HttpEngine owner, Request request) throws IOException {
         connection.connectAndSetOwner(client, owner, request);
@@ -125,7 +134,7 @@ public class OkHttpClient implements Cloneable {
   private HostnameVerifier hostnameVerifier;
   private Authenticator authenticator;
   private ConnectionPool connectionPool;
-  private HostResolver hostResolver;
+  private Network network;
   private boolean followSslRedirects = true;
   private boolean followRedirects = true;
   private int connectTimeout;
@@ -415,11 +424,11 @@ public class OkHttpClient implements Cloneable {
    * <ul>
    *   <li><a href="http://www.w3.org/Protocols/rfc2616/rfc2616.html">http/1.1</a>
    *   <li><a href="http://www.chromium.org/spdy/spdy-protocol/spdy-protocol-draft3-1">spdy/3.1</a>
-   *   <li><a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-13">h2-13</a>
+   *   <li><a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-14">h2-14</a>
    * </ul>
    *
    * <p><strong>This is an evolving set.</strong> Future releases may drop
-   * support for transitional protocols (like h2-13), in favor of their
+   * support for transitional protocols (like h2-14), in favor of their
    * successors (h2). The http/1.1 transport will never be dropped.
    *
    * <p>If multiple protocols are specified, <a
@@ -446,19 +455,6 @@ public class OkHttpClient implements Cloneable {
     return protocols;
   }
 
-  /*
-   * Sets the {@code HostResolver} that will be used by this client to resolve
-   * hostnames to IP addresses.
-   */
-  public OkHttpClient setHostResolver(HostResolver hostResolver) {
-    this.hostResolver = hostResolver;
-    return this;
-  }
-
-  public HostResolver getHostResolver() {
-    return hostResolver;
-  }
-
   /**
    * Prepares the {@code request} to be executed at some point in the future.
    */
@@ -467,8 +463,8 @@ public class OkHttpClient implements Cloneable {
   }
 
   /**
-   * Cancels all scheduled tasks tagged with {@code tag}. Requests that are already
-   * complete cannot be canceled.
+   * Cancels all scheduled or in-flight calls tagged with {@code tag}. Requests
+   * that are already complete cannot be canceled.
    */
   public OkHttpClient cancel(Object tag) {
     getDispatcher().cancel(tag);
@@ -505,8 +501,8 @@ public class OkHttpClient implements Cloneable {
     if (result.protocols == null) {
       result.protocols = Util.immutableList(Protocol.HTTP_2, Protocol.SPDY_3, Protocol.HTTP_1_1);
     }
-    if (result.hostResolver == null) {
-      result.hostResolver = HostResolver.DEFAULT;
+    if (result.network == null) {
+      result.network = Network.DEFAULT;
     }
     return result;
   }

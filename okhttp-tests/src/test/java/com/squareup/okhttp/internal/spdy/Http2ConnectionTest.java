@@ -46,7 +46,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public final class Http2ConnectionTest {
-  private static final Variant HTTP_2 = new Http20Draft13();
+  private static final Variant HTTP_2 = new Http20Draft14();
   private final MockSpdyPeer peer = new MockSpdyPeer();
 
   @After public void tearDown() throws Exception {
@@ -143,7 +143,7 @@ public final class Http2ConnectionTest {
 
     // verify the peer's settings were read and applied.
     assertEquals(0, connection.peerSettings.getHeaderTableSize());
-    Http20Draft13.Reader frameReader = (Http20Draft13.Reader) connection.readerRunnable.frameReader;
+    Http20Draft14.Reader frameReader = (Http20Draft14.Reader) connection.readerRunnable.frameReader;
     assertEquals(0, frameReader.hpackReader.maxHeaderTableByteCount());
     // TODO: when supported, check the frameWriter's compression table is unaffected.
   }
@@ -157,6 +157,18 @@ public final class Http2ConnectionTest {
 
     // verify the peer's settings were read and applied.
     assertFalse(connection.peerSettings.getEnablePush(true));
+  }
+
+  @Test public void peerIncreasesMaxFrameSize() throws Exception {
+    int newMaxFrameSize = 0x4001;
+    Settings settings = new Settings();
+    settings.set(Settings.MAX_FRAME_SIZE, 0, newMaxFrameSize);
+
+    SpdyConnection connection = sendHttp2SettingsAndCheckForAck(true, settings);
+
+    // verify the peer's settings were read and applied.
+    assertEquals(newMaxFrameSize, connection.peerSettings.getMaxFrameSize(-1));
+    assertEquals(newMaxFrameSize, connection.frameWriter.maxDataLength());
   }
 
   @Test public void receiveGoAwayHttp2() throws Exception {
@@ -222,13 +234,13 @@ public final class Http2ConnectionTest {
     peer.sendFrame().synReply(false, 3, headerEntries("a", "android"));
     for (int i = 0; i < 3; i++) {
       // Send frames of summing to size 50, which is windowUpdateThreshold.
-      peer.sendFrame().data(false, 3, data(24));
-      peer.sendFrame().data(false, 3, data(25));
-      peer.sendFrame().data(false, 3, data(1));
+      peer.sendFrame().data(false, 3, data(24), 24);
+      peer.sendFrame().data(false, 3, data(25), 25);
+      peer.sendFrame().data(false, 3, data(1), 1);
       peer.acceptFrame(); // connection WINDOW UPDATE
       peer.acceptFrame(); // stream WINDOW UPDATE
     }
-    peer.sendFrame().data(true, 3, data(0));
+    peer.sendFrame().data(true, 3, data(0), 0);
     peer.play();
 
     // Play it back.
@@ -268,7 +280,7 @@ public final class Http2ConnectionTest {
     // Write the mocking script.
     peer.acceptFrame(); // SYN_STREAM
     peer.sendFrame().synReply(false, 3, headerEntries("a", "android"));
-    peer.sendFrame().data(true, 3, data(0));
+    peer.sendFrame().data(true, 3, data(0), 0);
     peer.play();
 
     // Play it back.
@@ -308,7 +320,7 @@ public final class Http2ConnectionTest {
   @Test public void maxFrameSizeHonored() throws Exception {
     peer.setVariantAndClient(HTTP_2, false);
 
-    byte[] buff = new byte[HTTP_2.maxFrameSize() + 1];
+    byte[] buff = new byte[peer.maxOutboundDataLength() + 1];
     Arrays.fill(buff, (byte) '*');
 
     // write the mocking script
@@ -329,7 +341,7 @@ public final class Http2ConnectionTest {
     MockSpdyPeer.InFrame synStream = peer.takeFrame();
     assertEquals(TYPE_HEADERS, synStream.type);
     MockSpdyPeer.InFrame data = peer.takeFrame();
-    assertEquals(HTTP_2.maxFrameSize(), data.data.length);
+    assertEquals(peer.maxOutboundDataLength(), data.data.length);
     data = peer.takeFrame();
     assertEquals(1, data.data.length);
   }
@@ -351,7 +363,7 @@ public final class Http2ConnectionTest {
         new Header(Header.RESPONSE_STATUS, "200")
     );
     peer.sendFrame().synReply(true, 2, expectedResponseHeaders);
-    peer.sendFrame().data(true, 3, data(0));
+    peer.sendFrame().data(true, 3, data(0), 0);
     peer.play();
 
     RecordingPushObserver observer = new RecordingPushObserver();
