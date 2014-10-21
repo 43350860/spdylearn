@@ -37,7 +37,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
+
 import javax.net.ssl.SSLSocket;
+
+import org.eclipse.jetty.npn.NextProtoNego.ClientProvider;
 
 /**
  * Access to Platform-specific features necessary for SPDY and advanced TLS.
@@ -361,9 +364,14 @@ public class Platform {
 
     @Override public byte[] getNpnSelectedProtocol(SSLSocket socket) {
       try {
+        Object proxy = getMethod.invoke(null, socket);
+        ClientProvider clientProvider = (ClientProvider) proxy;
+        clientProvider.supports();
+        clientProvider.selectProtocol(null);
+        
         JettyNpnProvider provider =
-            (JettyNpnProvider) Proxy.getInvocationHandler(getMethod.invoke(null, socket));
-        if (!provider.unsupported && provider.selected == null) {
+            (JettyNpnProvider) Proxy.getInvocationHandler(proxy);
+        if (!provider.unsupported  && provider.selected == null) {
           Logger logger = Logger.getLogger("com.squareup.okhttp.OkHttpClient");
           logger.log(Level.INFO,
               "NPN callback dropped so SPDY is disabled. " + "Is npn-boot on the boot class path?");

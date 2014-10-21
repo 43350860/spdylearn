@@ -28,10 +28,12 @@ import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Date;
+
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 import javax.security.auth.x500.X500Principal;
+
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 
@@ -66,7 +68,7 @@ public final class SslContextBuilder {
     // Generate public and private keys and use them to make a self-signed certificate.
     KeyPair keyPair = generateKeyPair();
     X509Certificate certificate = selfSignedCertificate(keyPair);
-
+    
     // Put 'em in a key store.
     KeyStore keyStore = newEmptyKeyStore(password);
     Certificate[] certificateChain = { certificate };

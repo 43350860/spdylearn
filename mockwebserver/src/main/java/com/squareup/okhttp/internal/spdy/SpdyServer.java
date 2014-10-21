@@ -109,7 +109,6 @@ public final class SpdyServer implements IncomingStreamHandler {
 		}
 
 		if (path == null) {
-			// TODO: send bad request error
 			throw new AssertionError();
 		}
 

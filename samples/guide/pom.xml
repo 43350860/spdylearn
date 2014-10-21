@@ -31,5 +31,11 @@
       <scope>provided</scope>
     </dependency>
     
+     <dependency>
+      <groupId>org.mortbay.jetty.npn</groupId>
+      <artifactId>npn-boot</artifactId>
+      <optional>true</optional>
+    </dependency>
+    
   </dependencies>
 </project>
