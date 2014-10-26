@@ -12,8 +12,6 @@ import com.squareup.okhttp.OkHttpClient;
 
 /**
  * 
- * 自己练习用的post
- * 
  * @author jm
  * 
  */
@@ -43,7 +41,7 @@ public class MyPostExample {
 			mOutputStream.write(body);
 			mOutputStream.flush();
 
-			// 判断是否没有成功
+			// 锟叫讹拷锟角凤拷没锟叫成癸拷
 			if (mConnection.getResponseCode() != HttpURLConnection.HTTP_OK) {
 				return "Unexpected HTTP response : "
 						+ mConnection.getResponseCode() + " "

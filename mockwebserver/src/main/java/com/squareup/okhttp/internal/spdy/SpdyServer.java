@@ -16,8 +16,6 @@
 
 package com.squareup.okhttp.internal.spdy;
 
-import com.squareup.okhttp.internal.SslContextBuilder;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -28,10 +26,8 @@ import java.io.Writer;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.URI;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,6 +37,8 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
 import org.eclipse.jetty.npn.NextProtoNego;
+
+import com.squareup.okhttp.internal.SslContextBuilder;
 
 /** A basic SPDY server that serves the contents of a local directory. */
 public final class SpdyServer implements IncomingStreamHandler {
@@ -62,12 +60,12 @@ public final class SpdyServer implements IncomingStreamHandler {
 		serverSocket.setReuseAddress(true);
 		
 		while (true) {
-			LOGGER.log(Level.INFO, "服务器启动完成, 端口："+PORT);
+			LOGGER.log(Level.INFO, "Server start "+PORT);
 			Socket socket = serverSocket.accept();
 			if (sslSocketFactory != null) {
 				socket = doSsl(socket);
 			}
-			LOGGER.log(Level.INFO, "分发给SpdyConnection.");
+			LOGGER.log(Level.INFO, "Accept SpdyConnection.");
 			new SpdyConnection.Builder(false, socket).handler(this).build();
 		}
 	}

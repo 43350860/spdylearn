@@ -7,7 +7,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
 
-import com.squareup.okhttp.ConnectionPool;
 import com.squareup.okhttp.apache.OkApacheClient;
 
 public class OkApacheClientGetExample {
@@ -25,7 +24,7 @@ public class OkApacheClientGetExample {
 			@Override
 			public void run() {
 				try {
-					System.out.println("ÇëÇó=====1");
+					System.out.println("å¼€å§‹=====1");
 					OkApacheClient okApacheClient = new OkApacheClient();
 					HttpGet httpGet = new HttpGet(mUrl);
 					HttpResponse execute = okApacheClient.execute(httpGet);
@@ -45,7 +44,7 @@ public class OkApacheClientGetExample {
 			public void run() {
 				try {
 					Thread.sleep(3000);
-					System.out.println("ÇëÇó=====2");
+					System.out.println("ï¿½ï¿½ï¿½ï¿½=====2");
 					OkApacheClient okApacheClient2 = new OkApacheClient();
 					HttpGet httpGet2 = new HttpGet(mUrl);
 					HttpResponse execute2 = okApacheClient2.execute(httpGet2);
