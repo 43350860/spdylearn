@@ -9,14 +9,11 @@ import java.security.cert.X509Certificate;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import javax.security.cert.CertificateException;
 
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.internal.http.HttpsURLConnectionImpl;
-import com.sun.net.ssl.HttpsURLConnection;
 
 public class LocalSpdyClient {
 

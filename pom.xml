@@ -19,6 +19,7 @@
     <module>okhttp-protocols</module>
     <module>mockwebserver</module>
     <module>samples</module>
+    <module>okhttp-depth-exploration</module>
   </modules>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
